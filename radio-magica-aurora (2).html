@@ -1,0 +1,878 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Radio Mágica Aurora – Hogtware Revolution</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&family=Cinzel:wght@400;600&family=IM+Fell+English:ital@0;1&display=swap" rel="stylesheet">
+
+<style>
+  /* ─── RESET & ROOT ─────────────────────────────────────────── */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --gold:      #d4a843;
+    --gold-lt:   #f0cc78;
+    --gold-dk:   #8a6a1a;
+    --ember:     #c44b1a;
+    --ember-lt:  #ff7040;
+    --arcane:    #7b3fa0;
+    --arcane-lt: #b06ee0;
+    --deep:      #07060f;
+    --panel:     rgba(12, 8, 28, 0.82);
+    --rim:       rgba(212, 168, 67, 0.35);
+    --glow-gold: 0 0 18px rgba(212,168,67,.7), 0 0 60px rgba(212,168,67,.25);
+    --glow-arc:  0 0 22px rgba(176,110,224,.8), 0 0 70px rgba(123,63,160,.3);
+    --font-h:    'Cinzel Decorative', serif;
+    --font-b:    'Cinzel', serif;
+    --font-i:    'IM Fell English', serif;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: var(--font-b);
+    background: var(--deep);
+    color: #e8dfc5;
+    min-height: 100vh;
+    overflow-x: hidden;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+  }
+
+  /* ─── CANVAS PARTICLES ──────────────────────────────────────── */
+  #stars {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+  }
+
+  /* ─── BACKGROUND LAYERS ─────────────────────────────────────── */
+  .bg-gradient {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    background:
+      radial-gradient(ellipse 80% 60% at 50% 0%,   rgba(123,63,160,.28) 0%, transparent 70%),
+      radial-gradient(ellipse 60% 50% at 15% 100%,  rgba(196,75,26,.22) 0%, transparent 65%),
+      radial-gradient(ellipse 60% 50% at 85% 100%,  rgba(212,168,67,.15) 0%, transparent 65%),
+      linear-gradient(180deg, #0b0918 0%, #07060f 60%, #100810 100%);
+    pointer-events: none;
+  }
+
+  /* ─── MIST LAYER ─────────────────────────────────────────────── */
+  .mist {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    height: 35vh;
+    background: linear-gradient(0deg, rgba(123,63,160,.12) 0%, transparent 100%);
+    filter: blur(30px);
+    pointer-events: none;
+    z-index: 0;
+    animation: mistDrift 8s ease-in-out infinite alternate;
+  }
+  @keyframes mistDrift {
+    from { opacity: .5; transform: scaleX(1); }
+    to   { opacity: .9; transform: scaleX(1.06); }
+  }
+
+  /* ─── RUNE RING (decorative SVG) ────────────────────────────── */
+  .rune-ring {
+    position: fixed;
+    width: min(700px, 110vw);
+    height: min(700px, 110vw);
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    opacity: .07;
+    pointer-events: none;
+    z-index: 0;
+    animation: slowSpin 80s linear infinite;
+  }
+  @keyframes slowSpin { to { transform: translate(-50%, -50%) rotate(360deg); } }
+
+  /* ─── LAYOUT ─────────────────────────────────────────────────── */
+  .page-wrap {
+    position: relative;
+    z-index: 10;
+    width: 100%;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 2rem 1rem 4rem;
+    gap: 2.2rem;
+  }
+
+  /* ─── HEADER ─────────────────────────────────────────────────── */
+  header {
+    text-align: center;
+    padding-top: 1rem;
+    animation: fadeDown .9s ease both;
+  }
+  @keyframes fadeDown {
+    from { opacity: 0; transform: translateY(-30px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .crest {
+    display: inline-block;
+    font-size: clamp(2.4rem, 8vw, 4.2rem);
+    filter: drop-shadow(0 0 18px rgba(212,168,67,.9));
+    animation: floatCrest 5s ease-in-out infinite;
+    margin-bottom: .4rem;
+  }
+  @keyframes floatCrest {
+    0%,100% { transform: translateY(0); }
+    50%      { transform: translateY(-10px); }
+  }
+
+  h1 {
+    font-family: var(--font-h);
+    font-size: clamp(1.5rem, 6vw, 3rem);
+    font-weight: 900;
+    letter-spacing: .08em;
+    line-height: 1.15;
+    background: linear-gradient(135deg, #f0cc78 0%, #d4a843 40%, #c07820 70%, #f0cc78 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-shadow: none;
+    filter: drop-shadow(0 0 14px rgba(212,168,67,.6));
+  }
+
+  .subtitle {
+    font-family: var(--font-h);
+    font-size: clamp(.75rem, 2.8vw, 1.15rem);
+    letter-spacing: .35em;
+    text-transform: uppercase;
+    color: var(--arcane-lt);
+    margin-top: .35rem;
+    text-shadow: 0 0 14px rgba(176,110,224,.8);
+    animation: subtitlePulse 4s ease-in-out infinite alternate;
+  }
+  @keyframes subtitlePulse {
+    from { opacity: .75; }
+    to   { opacity: 1; text-shadow: 0 0 24px rgba(176,110,224,1); }
+  }
+
+  .divider {
+    width: clamp(180px, 55vw, 400px);
+    height: 1px;
+    margin: .9rem auto 0;
+    background: linear-gradient(90deg, transparent, var(--gold), var(--arcane-lt), var(--gold), transparent);
+    box-shadow: 0 0 8px rgba(212,168,67,.5);
+  }
+
+  /* ─── ALTAR ──────────────────────────────────────────────────── */
+  .altar {
+    width: 100%;
+    max-width: 500px;
+    background: var(--panel);
+    border: 1px solid var(--rim);
+    border-radius: 24px;
+    padding: clamp(1.8rem, 5vw, 2.8rem) clamp(1.5rem, 5vw, 2.5rem);
+    box-shadow:
+      0 0 0 1px rgba(212,168,67,.08),
+      0 0 40px rgba(123,63,160,.3),
+      0 0 120px rgba(7,6,15,.9),
+      inset 0 1px 0 rgba(240,204,120,.12);
+    backdrop-filter: blur(18px);
+    position: relative;
+    animation: altarRise 1.1s .3s ease both;
+    overflow: hidden;
+  }
+  @keyframes altarRise {
+    from { opacity: 0; transform: translateY(50px) scale(.96); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  /* corner runes */
+  .altar::before, .altar::after {
+    content: '⟡';
+    position: absolute;
+    font-size: 1.1rem;
+    color: var(--gold);
+    opacity: .5;
+    filter: drop-shadow(0 0 6px var(--gold));
+  }
+  .altar::before { top: .9rem; left: 1rem; }
+  .altar::after  { top: .9rem; right: 1rem; }
+
+  .altar-corner-bl, .altar-corner-br {
+    position: absolute;
+    font-size: 1.1rem;
+    color: var(--gold);
+    opacity: .5;
+    filter: drop-shadow(0 0 6px var(--gold));
+    bottom: .9rem;
+  }
+  .altar-corner-bl { left: 1rem; }
+  .altar-corner-br { right: 1rem; }
+
+  /* animated top border glow */
+  .altar-glow-bar {
+    position: absolute;
+    top: 0; left: 10%; right: 10%;
+    height: 2px;
+    border-radius: 2px;
+    background: linear-gradient(90deg, transparent, var(--gold-lt), var(--arcane-lt), var(--gold-lt), transparent);
+    animation: barGlow 3s ease-in-out infinite alternate;
+  }
+  @keyframes barGlow {
+    from { opacity: .4; box-shadow: 0 0 6px var(--gold); }
+    to   { opacity: 1; box-shadow: 0 0 18px var(--gold), 0 0 40px var(--arcane-lt); }
+  }
+
+  /* ─── LIVE BADGE ─────────────────────────────────────────────── */
+  .live-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: .5rem;
+    background: rgba(196,75,26,.18);
+    border: 1px solid rgba(196,75,26,.5);
+    border-radius: 99px;
+    padding: .3rem .95rem;
+    font-size: .72rem;
+    font-family: var(--font-b);
+    letter-spacing: .18em;
+    text-transform: uppercase;
+    color: #ff8560;
+    margin-bottom: 1.4rem;
+    box-shadow: 0 0 14px rgba(196,75,26,.25);
+  }
+  .live-dot {
+    width: 8px; height: 8px;
+    background: #ff4a1a;
+    border-radius: 50%;
+    box-shadow: 0 0 8px #ff4a1a;
+    animation: livePulse 1.2s ease-in-out infinite;
+  }
+  @keyframes livePulse {
+    0%,100% { opacity: 1; transform: scale(1); }
+    50%      { opacity: .4; transform: scale(.6); }
+  }
+
+  /* ─── VISUALIZER ─────────────────────────────────────────────── */
+  .visualizer {
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    gap: 4px;
+    height: 48px;
+    margin-bottom: 1.8rem;
+  }
+  .bar {
+    width: 5px;
+    border-radius: 3px 3px 0 0;
+    background: linear-gradient(0deg, var(--gold-dk), var(--gold-lt));
+    box-shadow: 0 0 6px rgba(212,168,67,.5);
+    animation: barDance var(--d, .8s) ease-in-out infinite alternate;
+    height: 8px;
+  }
+  .bar:nth-child(odd)  { background: linear-gradient(0deg, var(--arcane), var(--arcane-lt)); box-shadow: 0 0 6px rgba(176,110,224,.5); }
+  .bar.paused { animation-play-state: paused; }
+
+  @keyframes barDance {
+    from { height: 6px; }
+    to   { height: var(--h, 38px); }
+  }
+
+  /* ─── STATUS TEXT ────────────────────────────────────────────── */
+  .status-line {
+    text-align: center;
+    margin-bottom: 1.6rem;
+  }
+  .status-phrase {
+    font-family: var(--font-i);
+    font-style: italic;
+    font-size: clamp(.85rem, 2.8vw, 1rem);
+    color: var(--gold-lt);
+    opacity: .85;
+    display: block;
+    min-height: 1.4em;
+    transition: opacity .4s;
+  }
+  .status-host {
+    font-size: .72rem;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: var(--arcane-lt);
+    opacity: .7;
+    margin-top: .35rem;
+    display: block;
+  }
+
+  /* ─── PLAY BUTTON ────────────────────────────────────────────── */
+  .play-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: .7rem;
+    width: 100%;
+    padding: 1.1rem 1.5rem;
+    border-radius: 14px;
+    border: 1px solid var(--gold);
+    background: linear-gradient(135deg, rgba(212,168,67,.18) 0%, rgba(123,63,160,.22) 100%);
+    color: var(--gold-lt);
+    font-family: var(--font-b);
+    font-size: clamp(.9rem, 3vw, 1.08rem);
+    letter-spacing: .14em;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    transition: transform .2s, box-shadow .3s, border-color .3s;
+    box-shadow: 0 0 22px rgba(212,168,67,.3), inset 0 1px 0 rgba(240,204,120,.12);
+    margin-bottom: .9rem;
+  }
+  .play-btn:hover {
+    transform: translateY(-2px) scale(1.01);
+    box-shadow: 0 0 36px rgba(212,168,67,.6), 0 0 80px rgba(123,63,160,.35), inset 0 1px 0 rgba(240,204,120,.2);
+    border-color: var(--gold-lt);
+  }
+  .play-btn:active { transform: scale(.98); }
+
+  /* ripple shimmer */
+  .play-btn::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(100deg, transparent 20%, rgba(255,255,255,.08) 50%, transparent 80%);
+    transform: translateX(-100%);
+    transition: transform .5s;
+  }
+  .play-btn:hover::before { transform: translateX(100%); }
+
+  .play-icon { font-size: 1.4rem; filter: drop-shadow(0 0 6px var(--gold)); }
+
+  /* secondary buttons */
+  .btn-row {
+    display: flex;
+    gap: .75rem;
+    width: 100%;
+  }
+  .sec-btn {
+    flex: 1;
+    padding: .7rem .5rem;
+    border-radius: 10px;
+    border: 1px solid rgba(212,168,67,.3);
+    background: rgba(12,8,28,.6);
+    color: #c5b88a;
+    font-family: var(--font-b);
+    font-size: clamp(.68rem, 2.2vw, .82rem);
+    letter-spacing: .12em;
+    cursor: pointer;
+    transition: all .25s;
+    text-align: center;
+  }
+  .sec-btn:hover {
+    border-color: var(--arcane-lt);
+    color: var(--arcane-lt);
+    box-shadow: 0 0 16px rgba(176,110,224,.4);
+    transform: translateY(-1px);
+  }
+  .sec-btn:active { transform: scale(.97); }
+
+  /* hidden audio */
+  #radio-audio { display: none; }
+
+  /* ─── INFO CARDS ─────────────────────────────────────────────── */
+  .info-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: .9rem;
+    width: 100%;
+    max-width: 500px;
+    animation: fadeUp .9s .55s ease both;
+  }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .info-card {
+    background: rgba(12,8,28,.75);
+    border: 1px solid rgba(212,168,67,.18);
+    border-radius: 14px;
+    padding: 1rem;
+    text-align: center;
+    backdrop-filter: blur(10px);
+    box-shadow: inset 0 1px 0 rgba(240,204,120,.06);
+    transition: border-color .3s, box-shadow .3s;
+  }
+  .info-card:hover {
+    border-color: rgba(212,168,67,.5);
+    box-shadow: 0 0 20px rgba(212,168,67,.15);
+  }
+  .info-card .ic-icon { font-size: 1.5rem; display: block; margin-bottom: .3rem; }
+  .info-card .ic-label { font-size: .62rem; letter-spacing: .18em; text-transform: uppercase; color: var(--arcane-lt); opacity: .7; }
+  .info-card .ic-val   { font-size: .85rem; color: var(--gold-lt); margin-top: .15rem; font-family: var(--font-i); font-style: italic; }
+
+  /* ─── MAGIC PHRASE TICKER ────────────────────────────────────── */
+  .magic-ticker {
+    width: 100%;
+    max-width: 500px;
+    text-align: center;
+    font-family: var(--font-i);
+    font-style: italic;
+    font-size: clamp(.78rem, 2.5vw, .95rem);
+    color: var(--gold);
+    opacity: .7;
+    letter-spacing: .06em;
+    animation: fadeUp .9s .7s ease both;
+  }
+  .magic-ticker span { display: inline-block; animation: tickerFade 6s ease-in-out infinite; }
+  @keyframes tickerFade {
+    0%,100% { opacity: .5; }
+    50%      { opacity: 1; }
+  }
+
+  /* ─── FOOTER ─────────────────────────────────────────────────── */
+  footer {
+    margin-top: auto;
+    padding-top: 2rem;
+    text-align: center;
+    font-size: .65rem;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    color: rgba(200,185,150,.35);
+    position: relative;
+    z-index: 10;
+    animation: fadeUp .9s .9s ease both;
+  }
+  footer span { color: rgba(200,185,150,.5); }
+
+  /* ─── CONNECTING OVERLAY ─────────────────────────────────────── */
+  #connecting-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 200;
+    background: rgba(7,6,15,.92);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1.2rem;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .4s;
+  }
+  #connecting-overlay.active { opacity: 1; pointer-events: all; }
+  .overlay-rune {
+    font-size: 3.5rem;
+    animation: spin 2s linear infinite;
+    filter: drop-shadow(0 0 18px var(--arcane-lt));
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .overlay-text {
+    font-family: var(--font-i);
+    font-style: italic;
+    font-size: 1.1rem;
+    color: var(--arcane-lt);
+    text-shadow: 0 0 14px var(--arcane-lt);
+  }
+
+  /* ─── RESPONSIVE ─────────────────────────────────────────────── */
+  @media (max-width: 380px) {
+    .btn-row { flex-direction: column; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Background layers -->
+<div class="bg-gradient"></div>
+<div class="mist"></div>
+<canvas id="stars"></canvas>
+
+<!-- Decorative rune ring SVG -->
+<svg class="rune-ring" viewBox="0 0 500 500" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="1">
+  <circle cx="250" cy="250" r="240" stroke="rgba(212,168,67,1)" stroke-dasharray="8 12"/>
+  <circle cx="250" cy="250" r="210" stroke="rgba(176,110,224,1)" stroke-dasharray="4 20"/>
+  <circle cx="250" cy="250" r="180" stroke="rgba(212,168,67,1)" stroke-dasharray="2 14"/>
+  <polygon points="250,30 460,370 40,370" stroke="rgba(212,168,67,1)" fill="none"/>
+  <polygon points="250,470 40,130 460,130" stroke="rgba(176,110,224,1)" fill="none"/>
+  <text x="250" y="258" text-anchor="middle" font-size="22" fill="rgba(212,168,67,1)" font-family="serif">✦ ᛟ ᚾ ᚢ ᛊ ✦</text>
+</svg>
+
+<!-- Connecting overlay -->
+<div id="connecting-overlay">
+  <div class="overlay-rune">✦</div>
+  <div class="overlay-text" id="overlay-msg">Conectando con la energía arcana…</div>
+</div>
+
+<!-- Main layout -->
+<div class="page-wrap">
+
+  <!-- HEADER -->
+  <header>
+    <div class="crest">🔮</div>
+    <h1>Radio Mágica Aurora</h1>
+    <p class="subtitle">Hogtware Revolution</p>
+    <div class="divider"></div>
+  </header>
+
+  <!-- ALTAR / PLAYER -->
+  <div class="altar" role="main" aria-label="Reproductor de radio">
+    <div class="altar-glow-bar"></div>
+    <span class="altar-corner-bl">⟡</span>
+    <span class="altar-corner-br">⟡</span>
+
+    <!-- Live badge -->
+    <div style="text-align:center;">
+      <span class="live-badge" id="live-badge">
+        <span class="live-dot"></span>
+        <span id="live-text">EN VIVO</span>
+      </span>
+    </div>
+
+    <!-- Visualizer bars -->
+    <div class="visualizer" id="visualizer" aria-hidden="true">
+      <!-- bars generated by JS -->
+    </div>
+
+    <!-- Status -->
+    <div class="status-line">
+      <span class="status-phrase" id="status-phrase">La magia está en el aire…</span>
+      <span class="status-host" id="status-host">▸ Transmitiendo desde Hogtware</span>
+    </div>
+
+    <!-- Hidden audio element -->
+    <!-- URL asignada por JS para resolver mixed-content HTTP/HTTPS -->
+    <audio id="radio-audio" preload="none"></audio>
+
+    <!-- Main play button -->
+    <button class="play-btn" id="play-btn" aria-label="Reproducir / Pausar">
+      <span class="play-icon" id="play-icon">▶</span>
+      <span id="play-label">Escuchar en Vivo</span>
+    </button>
+
+    <!-- Secondary buttons -->
+    <div class="btn-row">
+      <button class="sec-btn" id="stop-btn" aria-label="Detener reproducción">⏹ Detener</button>
+      <button class="sec-btn" id="mute-btn" aria-label="Silenciar">🔊 Silencio</button>
+    </div>
+  </div>
+
+  <!-- INFO CARDS -->
+  <div class="info-row" aria-label="Información de la emisora">
+    <div class="info-card">
+      <span class="ic-icon">🏰</span>
+      <span class="ic-label">Emisora</span>
+      <span class="ic-val">Hogtware Tower</span>
+    </div>
+    <div class="info-card">
+      <span class="ic-icon">✨</span>
+      <span class="ic-label">Energía</span>
+      <span class="ic-val" id="energy-val">Arcana Máxima</span>
+    </div>
+    <div class="info-card">
+      <span class="ic-icon">🕯️</span>
+      <span class="ic-label">Frecuencia</span>
+      <span class="ic-val">Aurora FM</span>
+    </div>
+    <div class="info-card">
+      <span class="ic-icon">🌙</span>
+      <span class="ic-label">Señal</span>
+      <span class="ic-val" id="signal-val">En reposo</span>
+    </div>
+  </div>
+
+  <!-- Rotating magic phrase -->
+  <p class="magic-ticker"><span id="ticker-text">✦ La magia está en el aire… ✦</span></p>
+
+  <!-- Footer -->
+  <footer>
+    <p>© 2026 Radio Mágica Aurora &nbsp;·&nbsp; <span>Creado por Juliáncito Riddle</span></p>
+  </footer>
+
+</div><!-- end page-wrap -->
+
+<script>
+  /* ─── PARTICLES ─────────────────────────────────────────────── */
+  (function(){
+    const canvas = document.getElementById('stars');
+    const ctx    = canvas.getContext('2d');
+    let   W, H, particles = [];
+
+    function resize(){
+      W = canvas.width  = window.innerWidth;
+      H = canvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resize);
+    resize();
+
+    function rnd(a,b){ return a + Math.random()*(b-a); }
+
+    const COLORS = ['rgba(212,168,67,', 'rgba(176,110,224,', 'rgba(255,255,255,'];
+
+    for(let i=0;i<120;i++){
+      particles.push({
+        x: rnd(0,1), y: rnd(0,1),
+        r: rnd(.4, 1.8),
+        a: rnd(0,1),
+        da: rnd(.003, .012) * (Math.random()<.5?1:-1),
+        dy: rnd(-.0002, -.0006),
+        col: COLORS[Math.floor(Math.random()*COLORS.length)]
+      });
+    }
+
+    function draw(){
+      ctx.clearRect(0,0,W,H);
+      for(let p of particles){
+        p.a += p.da;
+        if(p.a<=0||p.a>=1) p.da*=-1;
+        p.y += p.dy;
+        if(p.y < -0.01) p.y = 1.01;
+
+        ctx.beginPath();
+        ctx.arc(p.x*W, p.y*H, p.r, 0, Math.PI*2);
+        ctx.fillStyle = p.col + Math.min(1,Math.max(0,p.a)) + ')';
+        ctx.fill();
+      }
+      requestAnimationFrame(draw);
+    }
+    draw();
+  })();
+
+  /* ─── VISUALIZER BARS ───────────────────────────────────────── */
+  (function(){
+    const viz = document.getElementById('visualizer');
+    const heights = [14,22,36,44,38,28,44,38,22,36,44,28,20,36,14];
+    const delays  = [0,.2,.4,.1,.3,.5,.15,.35,.25,.45,.05,.3,.2,.1,.4];
+    for(let i=0;i<15;i++){
+      const b = document.createElement('div');
+      b.className = 'bar paused';
+      b.style.setProperty('--h', heights[i]+'px');
+      b.style.setProperty('--d', (.5+Math.random()*.6)+'s');
+      b.style.animationDelay = delays[i]+'s';
+      viz.appendChild(b);
+    }
+  })();
+
+  /* ─── MAGIC PHRASES ─────────────────────────────────────────── */
+  const phrases = [
+    '✦ La magia está en el aire… ✦',
+    '✦ Transmitiendo desde Hogtware… ✦',
+    '✦ El hechizo del sonido te envuelve… ✦',
+    '✦ Sintoniza tu alma con Aurora… ✦',
+    '✦ Runas de melodía en el éter… ✦',
+    '✦ La frecuencia arcana te llama… ✦',
+  ];
+  const statusPhrases = {
+    idle:    'La magia está en el aire…',
+    loading: 'Conectando con la energía arcana…',
+    playing: 'Transmitiendo ahora en vivo',
+    paused:  'Hechizo en pausa…',
+    error:   'El portal arcano está inestable…',
+  };
+
+  let phraseIdx  = 0;
+  const tickerEl = document.getElementById('ticker-text');
+  setInterval(()=>{
+    phraseIdx = (phraseIdx+1)%phrases.length;
+    tickerEl.style.opacity='0';
+    setTimeout(()=>{ tickerEl.textContent=phrases[phraseIdx]; tickerEl.style.opacity=''; },400);
+  }, 6000);
+  tickerEl.style.transition='opacity .4s';
+
+  /* ─── PLAYER LOGIC ──────────────────────────────────────────── */
+
+  /**
+   * STREAM URL – Puerto Shoutcast 32058
+   * Se selecciona automáticamente HTTP o HTTPS según el protocolo
+   * de la página para evitar errores de mixed-content en GitHub Pages.
+   * Shoutcast: la ruta /; devuelve el stream principal.
+   */
+  const STREAM_HOST = 'uk7freenew.listen2myradio.com';
+  const STREAM_PORT = '32058';
+  const STREAM_PATH = '/;';   // Shoutcast usa /; como punto de entrada del stream
+
+  function getStreamURL(){
+    // Si la página corre en HTTPS y el servidor no tiene SSL en ese puerto,
+    // intentamos icecast-style /stream como fallback, pero el host real es HTTP.
+    // GitHub Pages siempre es HTTPS → usamos el protocolo de la página.
+    const proto = window.location.protocol === 'https:' ? 'https' : 'http';
+    return `${proto}://${STREAM_HOST}:${STREAM_PORT}${STREAM_PATH}`;
+  }
+
+  const audio      = document.getElementById('radio-audio');
+  const playBtn    = document.getElementById('play-btn');
+  const playIcon   = document.getElementById('play-icon');
+  const playLabel  = document.getElementById('play-label');
+  const stopBtn    = document.getElementById('stop-btn');
+  const muteBtn    = document.getElementById('mute-btn');
+  const statusPhEl = document.getElementById('status-phrase');
+  const statusHost = document.getElementById('status-host');
+  const liveText   = document.getElementById('live-text');
+  const signalEl   = document.getElementById('signal-val');
+  const energyEl   = document.getElementById('energy-val');
+  const overlay    = document.getElementById('connecting-overlay');
+  const overlayMsg = document.getElementById('overlay-msg');
+  const bars       = document.querySelectorAll('.bar');
+
+  let isPlaying      = false;
+  let isMuted        = false;
+  let reconnectTimer = null;
+  let reconnectCount = 0;
+  const MAX_RECONNECT = 5;
+
+  /* ── Asignar src dinámicamente (evita que el browser bloquee mixed-content
+        antes de que el usuario interactúe) ── */
+  function assignStream(){
+    audio.src = getStreamURL();
+  }
+
+  function setPhrase(key){
+    statusPhEl.style.opacity='0';
+    setTimeout(()=>{ statusPhEl.textContent=statusPhrases[key]; statusPhEl.style.opacity='1'; },300);
+    statusPhEl.style.transition='opacity .3s';
+  }
+
+  function setBarsPlaying(play){
+    bars.forEach(b=>{ if(play) b.classList.remove('paused'); else b.classList.add('paused'); });
+  }
+
+  function showOverlay(msg, dur=1800){
+    overlayMsg.textContent = msg;
+    overlay.classList.add('active');
+    setTimeout(()=>overlay.classList.remove('active'), dur);
+  }
+
+  function updateUI(state){
+    if(state==='playing'){
+      playIcon.textContent  = '⏸';
+      playLabel.textContent = 'Pausar transmisión';
+      liveText.textContent  = 'EN VIVO';
+      signalEl.textContent  = '● Conectado';
+      energyEl.textContent  = 'Arcana Máxima ✦';
+      setBarsPlaying(true);
+      setPhrase('playing');
+      statusHost.textContent= '▸ Transmitiendo desde Hogtware';
+    } else if(state==='paused'){
+      playIcon.textContent  = '▶';
+      playLabel.textContent = 'Escuchar en Vivo';
+      liveText.textContent  = 'EN PAUSA';
+      signalEl.textContent  = 'Pausado';
+      energyEl.textContent  = 'En espera…';
+      setBarsPlaying(false);
+      setPhrase('paused');
+    } else if(state==='idle'){
+      playIcon.textContent  = '▶';
+      playLabel.textContent = 'Escuchar en Vivo';
+      liveText.textContent  = 'EN VIVO';
+      signalEl.textContent  = 'En reposo';
+      energyEl.textContent  = 'Arcana Máxima';
+      setBarsPlaying(false);
+      setPhrase('idle');
+      statusHost.textContent= '▸ Transmitiendo desde Hogtware';
+    } else if(state==='reconnecting'){
+      liveText.textContent  = 'RECONECTANDO…';
+      signalEl.textContent  = '↻ Buscando señal';
+      energyEl.textContent  = 'Restaurando…';
+      setPhrase('loading');
+    }
+  }
+
+  function startPlay(){
+    assignStream();
+    audio.load();
+    // Añadir timestamp para forzar bypass de caché en móviles
+    audio.src = getStreamURL() + '?t=' + Date.now();
+    return audio.play();
+  }
+
+  playBtn.addEventListener('click', ()=>{
+    if(!isPlaying){
+      clearTimeout(reconnectTimer);
+      reconnectCount = 0;
+      showOverlay('Conectando con la energía arcana…', 1600);
+      setPhrase('loading');
+      setTimeout(()=>{
+        startPlay().then(()=>{
+          isPlaying = true;
+          updateUI('playing');
+        }).catch((err)=>{
+          console.warn('Play bloqueado:', err);
+          updateUI('idle');
+          setPhrase('error');
+          signalEl.textContent = 'Sin señal';
+        });
+      }, 800);
+    } else {
+      clearTimeout(reconnectTimer);
+      audio.pause();
+      audio.src = '';
+      isPlaying = false;
+      updateUI('paused');
+    }
+  });
+
+  stopBtn.addEventListener('click', ()=>{
+    clearTimeout(reconnectTimer);
+    audio.pause();
+    audio.src = '';
+    isPlaying = false;
+    reconnectCount = 0;
+    showOverlay('Cerrando el portal arcano…', 1200);
+    setTimeout(()=>updateUI('idle'), 600);
+  });
+
+  muteBtn.addEventListener('click', ()=>{
+    isMuted = !isMuted;
+    audio.muted = isMuted;
+    muteBtn.textContent = isMuted ? '🔇 Activar' : '🔊 Silencio';
+  });
+
+  /* ── Eventos de audio ── */
+  audio.addEventListener('waiting', ()=>{ if(isPlaying) setPhrase('loading'); });
+  audio.addEventListener('playing', ()=>{ if(isPlaying){ setPhrase('playing'); reconnectCount=0; } });
+
+  /* Auto-reconexión ante caídas del stream */
+  audio.addEventListener('error', ()=>{
+    if(!isPlaying) return;
+    if(reconnectCount < MAX_RECONNECT){
+      reconnectCount++;
+      updateUI('reconnecting');
+      const delay = Math.min(3000 * reconnectCount, 15000);
+      reconnectTimer = setTimeout(()=>{
+        if(isPlaying){
+          startPlay().then(()=>updateUI('playing')).catch(()=>{});
+        }
+      }, delay);
+    } else {
+      isPlaying = false;
+      updateUI('idle');
+      setPhrase('error');
+      signalEl.textContent = 'Sin señal';
+      reconnectCount = 0;
+    }
+  });
+
+  audio.addEventListener('stalled', ()=>{
+    if(isPlaying && reconnectCount < MAX_RECONNECT){
+      reconnectCount++;
+      clearTimeout(reconnectTimer);
+      reconnectTimer = setTimeout(()=>{
+        if(isPlaying){
+          startPlay().then(()=>updateUI('playing')).catch(()=>{});
+        }
+      }, 4000);
+    }
+  });
+
+  /* ── Retomar audio tras desbloqueo en iOS/Android ── */
+  document.addEventListener('visibilitychange', ()=>{
+    if(document.visibilityState==='visible' && isPlaying && audio.paused){
+      startPlay().then(()=>updateUI('playing')).catch(()=>{});
+    }
+  });
+
+  /* initial state */
+  updateUI('idle');
+</script>
+</body>
+</html>
